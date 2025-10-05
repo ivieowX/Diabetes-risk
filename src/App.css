@@ -1,0 +1,17 @@
+/* App.css (ทางเลือก) — ใช้สำหรับจูนเล็ก ๆ เฉพาะหน้านี้ */
+.app-local {
+  /* ตัวอย่าง: เพิ่มช่องว่างพิเศษเฉพาะ wrapper หลัก */
+  margin-bottom: 0.5rem;
+}
+
+/* ตัวอย่าง: แก้ไขเฉพาะปุ่มบนหน้านี้ถ้าจำเป็น */
+.app-local .btn--highlight {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); /* indigo ring */
+  border-radius: 0.75rem;
+}
+
+/* ตัวอย่าง: print-only เฉพาะหน้า App */
+@media print {
+  .app-local .no-print-local { display: none !important; }
+}

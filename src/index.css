@@ -1,0 +1,302 @@
+@import "tailwindcss";
+/* โหลดฟอนต์ Prompt จาก Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+/* ใช้ Prompt ทั้งแอป */
+html, body, #root {
+  font-family: "Prompt", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+/* ── ตัวช่วยด้านการแสดงผลพื้นฐาน ─────────────────────────── */
+:root {
+  --ring-strong: 0 0 0 3px rgba(99, 102, 241, 0.15); /* indigo */
+  --shadow-soft: 0 10px 25px -10px rgba(2, 6, 23, 0.15); /* slate-950 */
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+/* ---------- PRINT: A4 clean report ---------- */
+@media print {
+  /* ขนาดหน้า + ระยะขอบ */
+  @page {
+    size: A4;
+    margin: 16mm 14mm 16mm 14mm; /* บน/ขวา/ล่าง/ซ้าย */
+  }
+
+  html, body {
+    background: #fff !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact; /* ให้สีใกล้เคียงของจริง */
+    print-color-adjust: exact;
+  }
+
+  /* ซ่อนส่วนที่ไม่ต้องการบนกระดาษ */
+  .no-print,
+  .u-screen-only,
+  .u-actionbar,
+  .u-navbar {
+    display: none !important;
+  }
+
+  /* ทำให้บล็อกสรุปดูเป็น “การ์ดรายงาน” */
+  .print-sheet {
+    background: #fff !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-section {
+    break-inside: avoid; /* กันโดนแบ่งครึ่งบล็อก */
+    page-break-inside: avoid;
+    margin-bottom: 14px;
+    border: 1px solid #e5e7eb; /* slate-200 */
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  /* หัวเรื่อง/ตัวเลขให้ชัดขึ้นบนกระดาษ */
+  .print-title { font-size: 18pt; font-weight: 700; letter-spacing: 0.2px; }
+  .print-subtitle { font-size: 10pt; color: #64748b; } /* slate-500 */
+  .print-kpi { font-size: 26pt; font-weight: 800; color: #0f172a; } /* slate-900 */
+  .print-hint { font-size: 9pt; color: #6b7280; } /* gray-500 */
+
+  /* Progress bar — ใช้ค่าสีอ่อนเพื่อประหยัดหมึก */
+  .print-progress {
+    height: 10px;
+    border-radius: 9999px;
+    background: #e5e7eb !important; /* slate-200 */
+    overflow: hidden;
+  }
+  .print-progress > span {
+    display: block;
+    height: 100%;
+    background: #60a5fa !important; /* sky-400 */
+  }
+
+  /* รายการแบบแถว key/value ให้จัดชิดขวาสวย ๆ */
+  .print-kv {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 12px;
+    font-size: 11pt;
+    align-items: baseline;
+  }
+  .print-kv .k { color: #6b7280; } /* gray-500 */
+  .print-kv .v { color: #111827; font-weight: 600; } /* gray-900 */
+
+  /* ป้ายระดับความเสี่ยง (ลดสีพื้นให้จางลง) */
+  .print-chip {
+    border: 1px solid #c7d2fe; /* indigo-200 */
+    background: #eef2ff;        /* indigo-50 */
+    color: #1e40af;             /* indigo-800 */
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 10pt;
+  }
+
+  /* ส่วนท้ายกระดาษ */
+  .print-footer {
+    margin-top: 10mm;
+    font-size: 9pt;
+    color: #6b7280;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* บังคับไม่ให้มี gradient หนัก ๆ บนกระดาษ */
+  .no-print-gradient {
+    background: #fff !important;
+  }
+}
+/* ---------- PRINT: one-page A4 & hide navbar ---------- */
+@media print {
+  @page {
+    size: A4;
+    /* ลดระยะขอบลงให้จุขึ้น (ปรับได้ 8–12mm ตามชอบ) */
+    margin: 10mm 10mm 10mm 10mm;
+  }
+
+  /* ซ่อนส่วนไม่ต้องพิมพ์ (navbar/ปุ่ม/แอคชันบาร์) */
+  .no-print,
+  .u-navbar,
+  .u-actionbar,
+  .u-screen-only {
+    display: none !important;
+  }
+
+  html, body {
+    background: #fff !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* บีบสรุปให้พอดีหน้าเดียว:
+     - zoom: ใช้ได้ดีใน Chrome/Edge
+     - transform: เป็น fallback สำหรับบางเบราว์เซอร์ */
+  .print-onepage {
+    zoom: 0.92; /* ปรับ 0.85–0.95 ตามความยาวจริงของคุณ */
+    transform: scale(0.92);
+    transform-origin: top left;
+    width: calc(100% / 0.92);
+  }
+
+  /* ทำการ์ด/ส่วนต่าง ๆ ให้กะทัดรัดขึ้น */
+  .print-sheet {
+    background: #fff !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* กันโดนแบ่งครึ่งบล็อก และลด padding/gap */
+  .print-section,
+  .rounded-3xl,
+  .rounded-2xl,
+  .border,
+  .shadow-sm {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ย่อฟอนต์และระยะห่างเล็กน้อยเพื่อให้จุหน้าเดียว */
+  .print-title { font-size: 16pt; font-weight: 700; }
+  .print-subtitle { font-size: 9pt; color: #64748b; }     /* slate-500 */
+  .print-kpi { font-size: 22pt; font-weight: 800; }
+  .print-hint { font-size: 8.5pt; color: #6b7280; }        /* gray-500 */
+
+  .p-6 { padding: 18px !important; }
+  .p-5 { padding: 16px !important; }
+  .p-4 { padding: 12px !important; }
+  .px-3 { padding-left: 10px !important; padding-right: 10px !important; }
+  .py-3 { padding-top: 10px !important; padding-bottom: 10px !important; }
+  .mb-6 { margin-bottom: 16px !important; }
+  .mb-5 { margin-bottom: 14px !important; }
+  .mb-4 { margin-bottom: 12px !important; }
+  .mt-4 { margin-top: 12px !important; }
+  .gap-4 { gap: 12px !important; }
+  .gap-3 { gap: 10px !important; }
+
+  /* แถบความคืบหน้า (โทนอ่อน ประหยัดหมึก) */
+  .print-progress { height: 10px; border-radius: 9999px; background: #e5e7eb !important; overflow: hidden; }
+  .print-progress > span { display: block; height: 100%; background: #60a5fa !important; }
+
+  /* ป้ายระดับความเสี่ยง (จางลงเล็กน้อย) */
+  .print-chip {
+    border: 1px solid #c7d2fe;  /* indigo-200 */
+    background: #eef2ff;        /* indigo-50 */
+    color: #1e40af;             /* indigo-800 */
+    padding: 3px 9px;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 10pt;
+  }
+
+  /* Key/Value สรุปผล */
+  .print-kv {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 12px;
+    font-size: 10.5pt;
+    align-items: baseline;
+  }
+  .print-kv .k { color: #6b7280; }
+  .print-kv .v { color: #111827; font-weight: 600; }
+
+  /* ไม่ใช้กราเดียนต์หนัก ๆ */
+  .no-print-gradient {
+    background: #fff !important;
+  }
+}
+
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background-color: #f8fafc; /* fallback ถ้า gradient ไม่ถูกใช้ */
+}
+
+/* ── Card/Panel สไตล์นุ่ม ๆ ใช้ซ้ำได้ ─────────────────────── */
+.card {
+  border-radius: 1.25rem;            /* rounded-2xl */
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08); /* slate-900/8% */
+  box-shadow: var(--shadow-soft);
+}
+
+/* ── ปุ่มโฟกัสให้คมชัด (เมื่อไม่ใช้ ring ของ Tailwind) ───── */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-strong);
+  border-radius: 0.75rem;
+}
+
+/* ── สกอร์บาร์/Progress ให้ดูเนียนขึ้น ───────────────────── */
+.progress-gradient {
+  background-image: linear-gradient(90deg, #6366f1, #38bdf8);
+}
+
+/* ── แอนิเมชัน float สำหรับแบ็คกราวด์ blob/ไอคอน ─────────── */
+@keyframes floaty {
+  0%   { transform: translateY(0) }
+  50%  { transform: translateY(-6px) }
+  100% { transform: translateY(0) }
+}
+.floaty {
+  animation: floaty 6s ease-in-out infinite;
+}
+
+/* ── Scrollbar เนียนตา (WebKit + Firefox) ─────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c7d2fe #f1f5f9; /* indigo-200 on slate-100 */
+}
+*::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #c7d2fe;         /* indigo-200 */
+  border-radius: 9999px;
+  border: 2px solid #f1f5f9;         /* slate-100 */
+}
+*::-webkit-scrollbar-track {
+  background-color: #f1f5f9;
+}
+
+/* ── ยูทิลิตี้เล็ก ๆ ใช้ใน JSX ได้ทันที ───────────────────── */
+.u-shadow-soft { box-shadow: var(--shadow-soft); }
+.u-glass {
+  backdrop-filter: saturate(150%) blur(8px);
+  background: rgba(255,255,255,.65);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+/* ── พิมพ์: ซ่อนส่วนที่ไม่จำเป็น & จัดขอบกระดาษ ─────────── */
+@media print {
+  @page { margin: 14mm; }
+  .no-print { display: none !important; }
+  /* ทำพื้นหลังขาวล้วน เพื่อความคมของข้อความในไฟล์ PDF */
+  body { background: #fff !important; }
+  /* ตัดเงาและ gradient ออกเวลาพิมพ์ */
+  .u-shadow-soft, .card, .progress-gradient { box-shadow: none !important; background-image: none !important; }
+}
+
+/* ── ไอเดียธีมสำเร็จรูป (toggle ผ่าน data-attr) ──────────── */
+/* ใส่บน <html data-theme="emerald"> เพื่อสลับธีม */
+html[data-theme="emerald"] {
+  --ring-strong: 0 0 0 3px rgba(16, 185, 129, 0.18); /* emerald */
+}
+html[data-theme="rose"] {
+  --ring-strong: 0 0 0 3px rgba(244, 63, 94, 0.18);  /* rose */
+}
