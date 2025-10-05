@@ -3,9 +3,11 @@ import React, { useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * FINDRISC Wizard – Soft Borders Version
- * - ปรับเส้นขอบเป็นเทาอ่อน (slate-200/60) + ring เบา ๆ
- * - อนิเมชันเดิม, พิมพ์ 1 แผ่น, navbar ไม่เข้าพิมพ์
+ * FINDRISC Wizard – Clear Questions Edition
+ * - หัวข้อคำถามชัดเจน (หัวการ์ด + คำอธิบายสั้นๆ)
+ * - เกณฑ์ให้คะแนนแบบกล่อง Hint ในข้อที่เกี่ยวข้อง
+ * - เส้นขอบอ่อน (slate-200/70) + ring เบา ๆ
+ * - พิมพ์ 1 แผ่น / Navbar ไม่เข้าพิมพ์ / มีอนิเมชันนุ่มๆ
  */
 
 const AGE_OPTIONS = [
@@ -14,11 +16,64 @@ const AGE_OPTIONS = [
   { label: "55–64 ปี", value: "55-64", score: 3 },
   { label: "> 64 ปี", value: ">64", score: 4 },
 ];
+
 const SEX_OPTIONS = [
   { label: "ชาย", value: "male" },
   { label: "หญิง", value: "female" },
 ];
 
+const STEPS = [
+  {
+    key: "age",
+    title: "อายุ",
+    desc: "เลือกช่วงอายุของคุณเพื่อคำนวณคะแนนความเสี่ยง",
+    icon: "calendar",
+  },
+  {
+    key: "sexwaist",
+    title: "เพศกำเนิด & รอบเอว",
+    desc: "กรอกเพศกำเนิดและรอบเอวตามหน่วยเซนติเมตร (วัดผ่านสะดือ)",
+    icon: "tape",
+  },
+  {
+    key: "bmi",
+    title: "ดัชนีมวลกาย (BMI)",
+    desc: "คำนวณจากส่วนสูงและน้ำหนัก หรือป้อนค่า BMI ด้วยตนเอง",
+    icon: "bmi",
+  },
+  {
+    key: "exercise",
+    title: "กิจกรรมทางกาย",
+    desc: "คุณทำกิจกรรมทางกายอย่างน้อย 30 นาทีต่อวันหรือไม่",
+    icon: "run",
+  },
+  {
+    key: "fruitveg",
+    title: "ผัก/ผลไม้",
+    desc: "คุณรับประทานผักหรือผลไม้ทุกวันหรือไม่",
+    icon: "leaf",
+  },
+  {
+    key: "hypertRx",
+    title: "ยาลดความดัน",
+    desc: "คุณกำลังใช้ยาลดความดันโลหิตอยู่หรือไม่",
+    icon: "pill",
+  },
+  {
+    key: "highGlu",
+    title: "เคยมีน้ำตาลสูงผิดปกติ",
+    desc: "คุณเคยได้รับแจ้งว่าระดับน้ำตาลในเลือดสูงผิดปกติหรือไม่",
+    icon: "lab",
+  },
+  {
+    key: "famDm",
+    title: "ประวัติครอบครัวเบาหวาน",
+    desc: "มีญาติสายตรงหรือญาติห่างเป็นโรคเบาหวานหรือไม่",
+    icon: "family",
+  },
+];
+
+// ---------- Helpers ----------
 function calcBMI(weightKg, heightCm) {
   const h = Number(heightCm) / 100;
   const w = Number(weightKg);
@@ -47,7 +102,6 @@ function riskBand(total) {
   if (total <= 14)
     return {
       band: "ต่ำ–ปานกลาง",
-      color: "text-emerald-700",
       bar: "from-emerald-500 to-emerald-400",
       chip: "bg-emerald-50 text-emerald-700 ring-emerald-200",
       percent: "~1–17% ภายใน 10 ปี",
@@ -55,14 +109,12 @@ function riskBand(total) {
   if (total <= 20)
     return {
       band: "สูง",
-      color: "text-amber-700",
       bar: "from-amber-500 to-amber-400",
       chip: "bg-amber-50 text-amber-700 ring-amber-200",
       percent: "~33% ภายใน 10 ปี",
     };
   return {
     band: "สูงมาก",
-    color: "text-rose-700",
     bar: "from-rose-500 to-rose-400",
     chip: "bg-rose-50 text-rose-700 ring-rose-200",
     percent: "~50% ภายใน 10 ปี",
@@ -72,6 +124,7 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
+// ---------- App ----------
 export default function App() {
   const [view, setView] = useState("home");
   const [step, setStep] = useState(0);
@@ -256,6 +309,7 @@ export default function App() {
   );
 }
 
+// ---------- Home ----------
 function Home({ onStart }) {
   return (
     <section className="mx-auto max-w-5xl">
@@ -326,25 +380,17 @@ function Pill({ children, icon }) {
   );
 }
 
-const STEPS = [
-  { key: "age", title: "อายุ" },
-  { key: "sexwaist", title: "เพศกำเนิด & รอบเอว" },
-  { key: "bmi", title: "ดัชนีมวลกาย (BMI)" },
-  { key: "exercise", title: "กิจกรรมทางกาย" },
-  { key: "fruitveg", title: "ผัก/ผลไม้" },
-  { key: "hypertRx", title: "ยาลดความดัน" },
-  { key: "highGlu", title: "น้ำตาลสูงผิดปกติ" },
-  { key: "famDm", title: "ประวัติครอบครัว" },
-];
-
+// ---------- Wizard ----------
 function Wizard({ step, form, onChange, bmi, next, back, finish, setForm }) {
   const progress = `${Math.round(((step + 1) / STEPS.length) * 100)}%`;
+  const meta = STEPS[step];
 
   return (
     <section className="mx-auto max-w-4xl">
+      {/* Progress */}
       <div className="mb-6">
         <div className="mb-1 flex items-center justify-between text-sm text-slate-600">
-          <div>ขั้นตอน {step + 1} / {STEPS.length}: {STEPS[step].title}</div>
+          <div>ขั้นตอน {step + 1} / {STEPS.length}: {meta.title}</div>
           <div>{progress}</div>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200/70">
@@ -357,84 +403,194 @@ function Wizard({ step, form, onChange, bmi, next, back, finish, setForm }) {
         </div>
       </div>
 
+      {/* Card */}
       <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm ring-1 ring-slate-200/60">
+        {/* Question header (ชัดเจน) */}
+        <div className="mb-4 flex items-start gap-3">
+          <div className="mt-0.5">
+            <Icon name={meta.icon} className="h-5 w-5 text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">
+              คำถาม {step + 1}: {meta.title}
+            </h3>
+            <p className="mt-0.5 text-sm text-slate-600">{meta.desc}</p>
+          </div>
+        </div>
+
+        {/* Step body */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={STEPS[step].key}
+            key={meta.key}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
+            className="space-y-3"
           >
-            {STEPS[step].key === "age" && (
-              <Segmented
-                name="age"
-                value={form.age}
-                onChange={onChange}
-                options={AGE_OPTIONS.map((o) => ({ label: `${o.label} (+${o.score})`, value: o.value }))}
-              />
+            {meta.key === "age" && (
+              <>
+                <Segmented
+                  name="age"
+                  value={form.age}
+                  onChange={onChange}
+                  options={AGE_OPTIONS.map((o) => ({
+                    label: `${o.label} (+${o.score})`,
+                    value: o.value,
+                  }))}
+                />
+                <ScoreHint>
+                  เกณฑ์: &lt;45 = 0, 45–54 = 2, 55–64 = 3, &gt;64 = 4
+                </ScoreHint>
+              </>
             )}
 
-            {STEPS[step].key === "sexwaist" && (
-              <div className="space-y-3">
+            {meta.key === "sexwaist" && (
+              <>
                 <Segmented name="sex" value={form.sex} onChange={onChange} options={SEX_OPTIONS} />
                 <Field label="รอบเอว (ซม.)">
-                  <NumberInput name="waistCm" placeholder="เช่น 85" value={form.waistCm} onChange={onChange} min={40} max={200} />
+                  <NumberInput
+                    name="waistCm"
+                    placeholder="เช่น 85"
+                    value={form.waistCm}
+                    onChange={onChange}
+                    min={40}
+                    max={200}
+                  />
                 </Field>
-                <p className="text-xs text-slate-500">
-                  เกณฑ์ให้คะแนน: ชาย &lt;94=0, 94–102=3, &gt;102=4 • หญิง &lt;80=0, 80–88=3, &gt;88=4
-                </p>
-              </div>
+                <ScoreHint>
+                  เกณฑ์ให้คะแนน — ชาย: &lt;94 = 0, 94–102 = 3, &gt;102 = 4 • หญิง: &lt;80 = 0, 80–88 = 3, &gt;88 = 4
+                </ScoreHint>
+              </>
             )}
 
-            {STEPS[step].key === "bmi" && (
-              <div className="space-y-3">
+            {meta.key === "bmi" && (
+              <>
                 <label className="inline-flex items-center gap-2 text-sm">
-                  <input type="checkbox" name="useBMIManual" checked={form.useBMIManual} onChange={onChange} />
+                  <input
+                    type="checkbox"
+                    name="useBMIManual"
+                    checked={form.useBMIManual}
+                    onChange={onChange}
+                  />
                   <span>ป้อนค่า BMI เอง</span>
                 </label>
                 {!form.useBMIManual ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="ส่วนสูง (ซม.)"><NumberInput name="heightCm" placeholder="เช่น 165" value={form.heightCm} onChange={onChange} min={80} max={250} /></Field>
-                    <Field label="น้ำหนัก (กก.)"><NumberInput name="weightKg" placeholder="เช่น 68" value={form.weightKg} onChange={onChange} min={20} max={300} /></Field>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Field label="ส่วนสูง (ซม.)">
+                      <NumberInput
+                        name="heightCm"
+                        placeholder="เช่น 165"
+                        value={form.heightCm}
+                        onChange={onChange}
+                        min={80}
+                        max={250}
+                      />
+                    </Field>
+                    <Field label="น้ำหนัก (กก.)">
+                      <NumberInput
+                        name="weightKg"
+                        placeholder="เช่น 68"
+                        value={form.weightKg}
+                        onChange={onChange}
+                        min={20}
+                        max={300}
+                      />
+                    </Field>
                   </div>
                 ) : (
-                  <Field label="BMI (กก./ม²)"><NumberInput name="bmiManual" step="0.1" placeholder="เช่น 27.5" value={form.bmiManual} onChange={onChange} min={10} max={70} /></Field>
+                  <Field label="BMI (กก./ม²)">
+                    <NumberInput
+                      name="bmiManual"
+                      step="0.1"
+                      placeholder="เช่น 27.5"
+                      value={form.bmiManual}
+                      onChange={onChange}
+                      min={10}
+                      max={70}
+                    />
+                  </Field>
                 )}
                 <div className="rounded-xl bg-slate-50 p-3 text-sm">
-                  ค่า BMI ที่คำนวณได้: <strong>{bmi ? bmi.toFixed(1) : "-"}</strong> • เกณฑ์: &lt;25=0, 25–29.9=1, ≥30=3
+                  ค่า BMI ที่คำนวณได้: <strong>{bmi ? bmi.toFixed(1) : "-"}</strong>
                 </div>
-              </div>
+                <ScoreHint>
+                  เกณฑ์: &lt;25 = 0, 25–29.9 = 1, ≥30 = 3
+                </ScoreHint>
+              </>
             )}
 
-            {STEPS[step].key === "exercise" && (
-              <ToggleBoolean name="exercise" value={form.exercise} setForm={setForm} yesLabel="ใช่ (≥30 นาที/วัน)" noLabel="ไม่ใช่" />
+            {meta.key === "exercise" && (
+              <>
+                <ToggleBoolean
+                  name="exercise"
+                  value={form.exercise}
+                  setForm={setForm}
+                  yesLabel="ใช่ (≥30 นาที/วัน)"
+                  noLabel="ไม่ใช่"
+                />
+                <MiniText>นับรวมเดินเร็ว ปั่นจักรยาน ทำงานบ้านหนัก ฯลฯ</MiniText>
+              </>
             )}
-            {STEPS[step].key === "fruitveg" && (
-              <ToggleBoolean name="fruitveg" value={form.fruitveg} setForm={setForm} yesLabel="กินทุกวัน" noLabel="ไม่ได้ทุกวัน" />
+
+            {meta.key === "fruitveg" && (
+              <>
+                <ToggleBoolean
+                  name="fruitveg"
+                  value={form.fruitveg}
+                  setForm={setForm}
+                  yesLabel="กินทุกวัน"
+                  noLabel="ไม่ได้ทุกวัน"
+                />
+                <MiniText>ผัก/ผลไม้สด (ไม่หวานจัด) อย่างน้อยวันละ 1 ครั้ง</MiniText>
+              </>
             )}
-            {STEPS[step].key === "hypertRx" && (
-              <ToggleBoolean name="hypertRx" value={form.hypertRx} setForm={setForm} yesLabel="ใช้ยาลดความดัน" noLabel="ไม่ได้ใช้" />
+
+            {meta.key === "hypertRx" && (
+              <>
+                <ToggleBoolean
+                  name="hypertRx"
+                  value={form.hypertRx}
+                  setForm={setForm}
+                  yesLabel="ใช้ยาลดความดัน"
+                  noLabel="ไม่ได้ใช้"
+                />
+              </>
             )}
-            {STEPS[step].key === "highGlu" && (
-              <ToggleBoolean name="highGlu" value={form.highGlu} setForm={setForm} yesLabel="เคย" noLabel="ไม่เคย" />
+
+            {meta.key === "highGlu" && (
+              <>
+                <ToggleBoolean
+                  name="highGlu"
+                  value={form.highGlu}
+                  setForm={setForm}
+                  yesLabel="เคย"
+                  noLabel="ไม่เคย"
+                />
+                <MiniText>เช่น เคยถูกแจ้ง FPG สูง หรือผลคัดกรองผิดปกติ</MiniText>
+              </>
             )}
-            {STEPS[step].key === "famDm" && (
-              <Segmented
-                name="famDm"
-                value={form.famDm}
-                onChange={onChange}
-                options={[
-                  { label: "ไม่มี/ไม่ทราบ (+0)", value: "none" },
-                  { label: "ญาติห่าง (+3)", value: "extended" },
-                  { label: "ญาติสายตรง (+5)", value: "first" },
-                ]}
-              />
+
+            {meta.key === "famDm" && (
+              <>
+                <Segmented
+                  name="famDm"
+                  value={form.famDm}
+                  onChange={onChange}
+                  options={[
+                    { label: "ไม่มี/ไม่ทราบ (+0)", value: "none" },
+                    { label: "ญาติห่าง (+3)", value: "extended" },
+                    { label: "ญาติสายตรง (+5)", value: "first" },
+                  ]}
+                />
+                <MiniText>ญาติสายตรง = พ่อแม่/พี่น้อง/บุตร • ญาติห่าง = ปู่ย่า/ตายาย/ลุงป้าน้าอา</MiniText>
+              </>
             )}
           </motion.div>
         </AnimatePresence>
       </div>
 
+      {/* Nav */}
       <div className="mt-4 flex items-center justify-between">
         <Button variant="outline" onClick={back} disabled={step === 0} icon="back">ย้อนกลับ</Button>
         {step < STEPS.length - 1 ? (
@@ -447,6 +603,7 @@ function Wizard({ step, form, onChange, bmi, next, back, finish, setForm }) {
   );
 }
 
+// ---------- Summary ----------
 function Summary({ refEl, form, bmi, total, band, percent, chip, bar, barWidth }) {
   const printedAt = new Date().toLocaleString();
 
@@ -532,12 +689,25 @@ function Summary({ refEl, form, bmi, total, band, percent, chip, bar, barWidth }
   );
 }
 
+// ---------- Reusable UI ----------
 function Field({ label, children }) {
   return (
     <label className="block">
-      <div className="mb-1 text-sm text-slate-600">{label}</div>
+      <div className="mb-1 text-sm text-slate-700 font-medium">{label}</div>
       {children}
     </label>
+  );
+}
+
+function MiniText({ children }) {
+  return <p className="text-xs text-slate-500">{children}</p>;
+}
+
+function ScoreHint({ children }) {
+  return (
+    <div className="mt-1 rounded-lg border border-slate-200/80 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+      <strong className="mr-1 text-slate-700">เกณฑ์ให้คะแนน:</strong> {children}
+    </div>
   );
 }
 
@@ -563,13 +733,12 @@ function Segmented({ name, value, onChange, options = [] }) {
           key={opt.value}
           whileHover={{ y: -1 }}
           transition={{ duration: 0.1 }}
-          className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border p-3 transition ${
-            value === opt.value
+          className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border p-3 transition ${value === opt.value
               ? "border-indigo-500 bg-indigo-50 ring-2 ring-indigo-100"
               : "border-slate-300/70 hover:bg-slate-50"
-          }`}
+            }`}
         >
-          <span className="text-base md:text-sm text-slate-800">{opt.label}</span>
+          <span className="text-base md:text-sm text-slate-800 font-medium">{opt.label}</span>
           <input
             type="radio"
             className="accent-indigo-600"
@@ -590,18 +759,16 @@ function ToggleBoolean({ name, value, setForm, yesLabel = "ใช่", noLabel =
       <button
         type="button"
         onClick={() => setForm((p) => ({ ...p, [name]: true }))}
-        className={`px-4 py-3 text-base md:py-2 md:text-sm transition ${
-          value ? "bg-indigo-600 text-white" : "bg-white text-slate-700 hover:bg-slate-50"
-        }`}
+        className={`px-4 py-3 text-base md:py-2 md:text-sm transition ${value ? "bg-indigo-600 text-white" : "bg-white text-slate-700 hover:bg-slate-50"
+          }`}
       >
         {yesLabel}
       </button>
       <button
         type="button"
         onClick={() => setForm((p) => ({ ...p, [name]: false }))}
-        className={`px-4 py-3 text-base md:py-2 md:text-sm transition ${
-          !value ? "bg-indigo-600 text-white" : "bg-white text-slate-700 hover:bg-slate-50"
-        }`}
+        className={`px-4 py-3 text-base md:py-2 md:text-sm transition ${!value ? "bg-indigo-600 text-white" : "bg-white text-slate-700 hover:bg-slate-50"
+          }`}
       >
         {noLabel}
       </button>
@@ -676,6 +843,13 @@ function Icon({ name, className = "h-4 w-4", ...props }) {
     case "doc": return (<svg viewBox="0 0 24 24" className={className} {...props}><path {...common} d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path {...common} d="M14 2v6h6" /></svg>);
     case "info": return (<svg viewBox="0 0 24 24" className={className} {...props}><circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" /><path {...common} d="M12 8h.01M11 12h1v4h1" /></svg>);
     case "spark": return (<svg viewBox="0 0 24 24" className={className} {...props}><path {...common} d="M5 3v4M3 5h4M19 17v4m-2-2h4M11 11 7 7m10 10-4-4M12 2v6m0 8v6M2 12h6m8 0h6" /></svg>);
+    // ใหม่สำหรับหัวข้อคำถาม
+    case "calendar": return (<svg viewBox="0 0 24 24" className={className} {...props}><rect x="3" y="4" width="18" height="18" rx="2" /><path {...common} d="M16 2v4M8 2v4M3 10h18" /></svg>);
+    case "tape": return (<svg viewBox="0 0 24 24" className={className} {...props}><circle cx="9" cy="12" r="6" /><path {...common} d="M15 12h6" /></svg>);
+    case "bmi": return (<svg viewBox="0 0 24 24" className={className} {...props}><rect x="3" y="3" width="18" height="18" rx="2" /><path {...common} d="M8 17l8-10" /></svg>);
+    case "leaf": return (<svg viewBox="0 0 24 24" className={className} {...props}><path {...common} d="M12 2C7 2 3 6 3 11s4 9 9 9 9-4 9-9V4c-3 2-6 1-9-2Z" /></svg>);
+    case "pill": return (<svg viewBox="0 0 24 24" className={className} {...props}><rect x="3" y="8" width="18" height="8" rx="4" /><path {...common} d="M7 8v8" /></svg>);
+    case "family": return (<svg viewBox="0 0 24 24" className={className} {...props}><circle cx="7" cy="7" r="3" /><circle cx="17" cy="7" r="3" /><path {...common} d="M2 21v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2M12 21v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2" /></svg>);
     default: return null;
   }
 }
